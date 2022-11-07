@@ -1,7 +1,7 @@
 db.sql
 bot/bot.ini
 .idea
-/env
+env
 test.session
 test.session-journal
 user_bot.session
