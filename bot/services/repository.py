@@ -1,6 +1,9 @@
-from typing import List
-
 import asyncpgx
+
+from typing import List
+from sqlalchemy import select
+
+from models.schemas import User
 
 
 async def create_pool(user, password, database, host, echo):
@@ -29,17 +32,16 @@ class Repo:
         )
         return
 
-    async def list_users(self) -> List[int]:
+    async def list_users_str(self) -> List[int]:
         """List all bot users"""
         # return await self.conn.fetch(
         #     f"select userid from tg_users;"
         # )
-        return [
-            row
-            for row in await self.conn.fetch(
-                "select userid, username from tg_users;",
-            )
-        ]
+        res = await self.conn.execute(select(User))
+        res = res.all()
+
+        res = [f'{i[0].id}      -       {i[0].username}     -       🏦  {i[0].balance}' for i in res]
+        return res
 
     async def list_listened_channel(self):
         '''List all channel which are listened by the bot'''

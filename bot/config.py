@@ -4,10 +4,12 @@ from dataclasses import dataclass
 
 @dataclass
 class DbConfig:
+    name: str
     host: str
     password: str
     user: str
     database: str
+    port: int
 
 
 @dataclass
@@ -63,6 +65,7 @@ def load_config(path: str):
             use_redis=cast_bool(tg_bot.get("use_redis")),
             channel_id=int()
         ),
-        db=DbConfig(user=db['user'], password=db['password'], database=db['database'], host=db['host']),
+        db=DbConfig(name=db['name'], user=db['user'], password=db['password'], database=db['database'],
+                    host=db['host'], port = db['port']),
 
     )
