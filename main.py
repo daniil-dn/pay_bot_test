@@ -65,7 +65,7 @@ async def on_startup(dp):
         engine, class_=AsyncSession, expire_on_commit=False
     )
 
-    dp.middleware.setup(DbMiddleware(pool_session))
+    dp.middleware.setup(DbMiddleware(pool_session, logger))
     dp.middleware.setup(EnvironmentMiddleware(config, logger))
     dp.middleware.setup(LoggingMiddleware())
     dp.middleware.setup(RoleMiddleware(config.tg_bot.admin_ids))

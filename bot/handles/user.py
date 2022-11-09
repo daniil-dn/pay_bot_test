@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
 
 from bot.keyboards.keyboards import KeyboardManager
+from bot.models.role import UserRole
 from bot.services.repository import Repo
 
 
@@ -21,5 +22,6 @@ async def refill_balance(cb: CallbackQuery, repo: Repo, db, logger, config):
 
 
 def register_user(dp: Dispatcher):
-    dp.register_message_handler(start, commands=['start'], state='*')
-    dp.register_callback_query_handler(refill_balance, lambda c: c.data == 'refill_balance', state='*')
+    dp.register_message_handler(start, commands=['start'], state='*', role=(UserRole.USER, UserRole.ADMIN))
+    dp.register_callback_query_handler(refill_balance, lambda c: c.data == 'refill_balance', state='*',
+                                       role=(UserRole.USER, UserRole.ADMIN))

@@ -7,11 +7,7 @@ from bot.handles.states import Ban_Unban_state, BalanceChange
 from bot.models.role import UserRole
 from bot.services.repository import Repo
 from bot.keyboards.keyboards import KeyboardManager
-
-
-async def text_handler(m: Message, repo: Repo, db, logger, config):
-    await m.reply(f'✌✌️')
-    return
+from bot.services.tools import check_userID, check_username
 
 
 async def admin_command(m: Message, repo: Repo, db, logger, config, state):
@@ -61,7 +57,7 @@ async def back_ban_unban_menu(cb: CallbackQuery, repo: Repo, db, logger, config,
 
 
 async def ban_user(cb: CallbackQuery, repo: Repo, db, logger, config, state):
-    await cb.bot.answer_callback_query(cb.id, text='Enter user id')
+    await cb.bot.answer_callback_query(cb.id, text='Enter UserID')
     await cb.bot.edit_message_textedit_message_reply_markup(cb.message.chat.id, message_id=cb.message.message_id,
                                                             reply_markup=KeyboardManager.ban_enter())
     await state.update_data(message_id=cb.message.message_id)
@@ -71,15 +67,27 @@ async def ban_user(cb: CallbackQuery, repo: Repo, db, logger, config, state):
 async def waiting_ban_user(m: Message, repo: Repo, db, logger, config, state):
     state_data = await state.get_data()
     message_id = state_data['message_id']
-    username = 'username'
-    userID = 0
 
+    userID = check_userID(m.text)
+    username = check_username(m.text)
     await m.delete()
+    # if not userID and username:
+    if not userID:
+        await state.reset_data()
+        await Ban_Unban_state.waiting_for_ban_id.set()
+        await m.bot.edit_message_text(f'Enter valid UserID', m.chat.id,
+                                      message_id=message_id, reply_markup=KeyboardManager.ban_enter())
+        return
 
-    await m.bot.edit_message_text(f'{username} - {userID} UNBANED', m.chat.id,
-                                  message_id=message_id,
-                                  reply_markup=KeyboardManager.admin_start_inline())
-    await Ban_Unban_state.waiting_for_ban_id.set()
+    result = await repo.ban_user(userID)
+    if type(result) is Exception:
+        await m.bot.edit_message_text(f'ERROR {result} ', m.chat.id,
+                                      message_id=message_id, reply_markup=KeyboardManager.admin_start_inline())
+        await state.finish()
+
+    await m.bot.edit_message_text(f'{userID} BANED', m.chat.id,
+                                  message_id=message_id, reply_markup=KeyboardManager.admin_start_inline())
+    await state.finish()
 
 
 async def unban_user(cb: CallbackQuery, repo: Repo, db, logger, config, state):
@@ -93,18 +101,32 @@ async def unban_user(cb: CallbackQuery, repo: Repo, db, logger, config, state):
 async def waiting_unban_user(m: Message, repo: Repo, db, logger, config, state: FSMContext):
     state_data = await state.get_data()
     message_id = state_data['message_id']
-    username = 'username'
-    userID = 0
-    await m.delete()
 
-    await m.bot.edit_message_text(f'{username} - {userID} UNBANED', m.chat.id,
+    userID = check_userID(m.text)
+    username = check_username(m.text)
+    await m.delete()
+    # if not userID and username:
+    if not userID:
+        await state.reset_data()
+        await Ban_Unban_state.waiting_for_ban_id.set()
+        await m.bot.edit_message_text(f'Enter valid UserID', m.chat.id,
+                                      message_id=message_id, reply_markup=KeyboardManager.ban_enter())
+        return
+
+    result = await repo.unban_user(userID)
+    if type(result) is Exception:
+        await m.bot.edit_message_text(f'ERROR {result} ', m.chat.id,
+                                      message_id=message_id, reply_markup=KeyboardManager.admin_start_inline())
+        await state.finish()
+
+    await m.bot.edit_message_text(f'{userID} UNBANED', m.chat.id,
                                   message_id=message_id, reply_markup=KeyboardManager.admin_start_inline())
     await state.finish()
 
 
 async def change_balance(cb: CallbackQuery, repo: Repo, db, logger, config, state):
     await cb.bot.answer_callback_query(cb.id, text='Enter userID or username')
-    await cb.bot.edit_message_text('Waiting for userID or username', cb.message.chat.id,
+    await cb.bot.edit_message_text('Waiting for username', cb.message.chat.id,
                                    message_id=cb.message.message_id,
                                    reply_markup=KeyboardManager.balance_userid_enter())
     await state.update_data(message_id=cb.message.message_id)
@@ -114,14 +136,19 @@ async def change_balance(cb: CallbackQuery, repo: Repo, db, logger, config, stat
 async def waiting_user_balance(m: Message, repo: Repo, db, logger, config, state: FSMContext):
     state_data = await state.get_data()
     message_id = state_data['message_id']
-    username = 'username'
-    userID = 0
+    username = check_username(m.text)
     await m.delete()
+    if not username:
+        await m.bot.edit_message_text('🔄 Enter Valid Username 🔄', m.chat.id,
+                                      message_id=message_id,
+                                      reply_markup=KeyboardManager.balance_userid_enter())
+
+        return
     await m.bot.edit_message_text('Waiting for a new balance', m.chat.id,
                                   message_id=message_id,
                                   reply_markup=KeyboardManager.balance_amount_enter(username))
 
-    await state.update_data(username=username, userID=userID)
+    await state.update_data(username=username)
     await BalanceChange.waiting_amount.set()
 
 
@@ -129,19 +156,19 @@ async def waiting_amount_balance(m: Message, repo: Repo, db, logger, config, sta
     state_data = await state.get_data()
     message_id = state_data['message_id']
     username = state_data['username']
-    userID = state_data['userID']
     amount = m.text if m.text.isdigit() else None
     await m.delete()
 
     if amount:
-        await m.bot.edit_message_text(f'{username} - {userID} changed to 💰 {amount}', m.chat.id,
+        change_amount = await repo.change_balance(username, int(amount))
+        await m.bot.edit_message_text(f'{username}  changed to 💰 {amount}', m.chat.id,
                                       message_id=message_id,
                                       reply_markup=KeyboardManager.admin_start_inline())
     else:
-        await m.bot.edit_message_text(f'Entered invalid {username} - {userID} ', m.chat.id,
+        await m.bot.edit_message_text(f'Entered invalid balance {username} ', m.chat.id,
                                       message_id=message_id,
                                       reply_markup=KeyboardManager.balance_amount_enter(username))
-        await BalanceChange.waiting_amount()
+        await BalanceChange.waiting_amount.set()
 
     await state.finish()
     await state.reset_data()
@@ -164,4 +191,3 @@ def register_admin(dp: Dispatcher):
                                        role=UserRole.ADMIN)
     dp.register_message_handler(waiting_user_balance, state=BalanceChange.waiting_user, role=UserRole.ADMIN)
     dp.register_message_handler(waiting_amount_balance, state=BalanceChange.waiting_amount, role=UserRole.ADMIN)
-    dp.register_message_handler(text_handler, state="*")

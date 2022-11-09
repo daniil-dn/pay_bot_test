@@ -7,6 +7,7 @@ from aiogram.types.base import TelegramObject
 from bot.models.role import UserRole
 
 
+
 class RoleFilter(BoundFilter):
     key = 'role'
 

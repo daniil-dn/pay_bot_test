@@ -16,7 +16,7 @@ class User(Base):
         return 'id: {}, root username: {}, balance: {}'.format(self.id, self.username, self.balance)
 
 
-class Black_list(Base):
+class BlackList(Base):
     __tablename__ = 'black_list'
     id = Column(BigInteger, ForeignKey('user.id'), primary_key=True)
     when = Column(DateTime, default=func.now())

@@ -4,7 +4,7 @@ from aiogram.dispatcher.middlewares import LifetimeControllerMiddleware
 from aiogram.types import CallbackQuery
 from sqlalchemy.dialects.postgresql import insert
 from bot.models.role import UserRole
-from models.schemas import User, Black_list
+from models.schemas import User, BlackList
 
 
 class RoleMiddleware(LifetimeControllerMiddleware):
@@ -30,13 +30,14 @@ class RoleMiddleware(LifetimeControllerMiddleware):
         await data['repo'].conn.execute(
             insert(User).values({"id": id, "username": username}).on_conflict_do_nothing())
         await data['repo'].conn.commit()
-        block_id = await data['repo'].conn.get(Black_list, id)
+        block_id = await data['repo'].conn.get(BlackList, id)
         if block_id:
             if type(obj) is CallbackQuery:
                 cb_id = obj.id
                 await self.manager.bot.answer_callback_query(obj.id, 'You are in black list!', show_alert=True)
             else:
                 await obj.reply('You are in black list!')
+            data["role"] = UserRole.Ban
             return
 
     async def post_process(self, obj, data, *args):

@@ -40,7 +40,7 @@ class KeyboardManager:
     def unban_enter():
         kb = types.InlineKeyboardMarkup(row_width=1)
         uban = types.InlineKeyboardButton("👇️ Enter the UserID or Username below to ❎UNBAN❎ 👇",
-                                         callback_data='enter_smth_not_cb')
+                                          callback_data='enter_smth_not_cb')
         back = types.InlineKeyboardButton('◀️ BACK ◀️', callback_data='black_List_back')
         kb.add(uban, back)
         return kb
@@ -48,7 +48,7 @@ class KeyboardManager:
     @staticmethod
     def balance_userid_enter():
         kb = types.InlineKeyboardMarkup(row_width=1)
-        userid = types.InlineKeyboardButton("👇️ Enter the UserID or Username to 💸change balance💸 👇",
+        userid = types.InlineKeyboardButton("👇️ Enter Username to 💸change balance💸 👇",
                                             callback_data='enter_smth_not_cb')
         back = types.InlineKeyboardButton('◀️ BACK ◀️', callback_data='black_List_back')
         kb.add(userid, back)
@@ -57,7 +57,7 @@ class KeyboardManager:
     @staticmethod
     def balance_amount_enter(username):
         kb = types.InlineKeyboardMarkup(row_width=1)
-        balance = types.InlineKeyboardButton(f"👇️ Enter balance for {username} 👇",
+        balance = types.InlineKeyboardButton(f"👇️ Enter a new balance for {username} 👇",
                                              callback_data='enter_smth_not_cb')
         back = types.InlineKeyboardButton('◀️ BACK ◀️', callback_data='black_List_back')
         kb.add(balance, back)
