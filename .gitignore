@@ -1,5 +1,6 @@
 db.sql
 bot/bot.ini
+bot.ini
 .idea
 env
 test.session
