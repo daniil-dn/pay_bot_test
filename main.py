@@ -1,6 +1,7 @@
 import aiogram
 import logging
 
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,12 +51,7 @@ async def on_startup(dp):
     # Add handlers to the logger
     logger.addHandler(err_handler)
     logger.addHandler(all_handler)
-    logger.info('Starting bot')
-
-    # if config.tg_bot.use_redis:
-    #     storage = RedisStorage2()
-    # else:
-    #     storage = MemoryStorage()
+    logger.error('Starting bot')
 
     pool = await create_pool(
         user=config.db.user,

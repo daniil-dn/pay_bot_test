@@ -15,7 +15,7 @@ class RoleMiddleware(LifetimeControllerMiddleware):
         self.admin_ids = admin_ids
 
     async def pre_process(self, obj, data, *args):
-        # TODO Check user in db black list
+        # TODO Check user in dp black list
 
         if not getattr(obj, "from_user", None):
             data["role"] = None
