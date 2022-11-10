@@ -4,6 +4,7 @@ import logging
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from pyqiwip2p import QiwiP2P
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -53,20 +54,22 @@ async def on_startup(dp):
     logger.addHandler(all_handler)
     logger.error('Starting bot')
 
-    pool = await create_pool(
-        user=config.db.user,
-        password=config.db.password,
-        database=config.db.database,
-        host=config.db.host,
-        echo=False,
-    )
+    # pool = await create_pool(
+    #     user=config.db.user,
+    #     password=config.db.password,
+    #     database=config.db.database,
+    #     host=config.db.host,
+    #     echo=False,
+    # )
     engine = create_async_engine(URL.create(**DATABASE))
     pool_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
+    # p2p = QiwiP2P(auth_key=config.tg_bot.qiwi_key)
+    p2p = 2
 
     dp.middleware.setup(DbMiddleware(pool_session, logger))
-    dp.middleware.setup(EnvironmentMiddleware(config, logger))
+    dp.middleware.setup(EnvironmentMiddleware(config, logger, p2p))
     dp.middleware.setup(LoggingMiddleware())
     dp.middleware.setup(RoleMiddleware(config.tg_bot.admin_ids))
     dp.filters_factory.bind(RoleFilter)

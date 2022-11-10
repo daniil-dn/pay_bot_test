@@ -62,3 +62,18 @@ class KeyboardManager:
         back = types.InlineKeyboardButton('◀️ BACK ◀️', callback_data='black_List_back')
         kb.add(balance, back)
         return kb
+
+    @staticmethod
+    def waiting_amount_refill():
+        kb = kb = types.InlineKeyboardMarkup(row_width=1)
+        back = types.InlineKeyboardButton('◀️ BACK ◀️', callback_data='user_back')
+        kb.add(back)
+        return kb
+
+    @staticmethod
+    def pay_wait(payment_url, bill_id):
+        kb = kb = types.InlineKeyboardMarkup(row_width=1)
+        pay = types.InlineKeyboardButton('Оплатить', url=payment_url)
+        update = types.InlineKeyboardButton(text="Проверить оплату", callback_data=f'update-balance_{bill_id}')
+        kb.add(pay, update)
+        return kb

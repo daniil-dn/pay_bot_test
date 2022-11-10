@@ -9,3 +9,6 @@ class Ban_Unban_state(StatesGroup):
 class BalanceChange(StatesGroup):
     waiting_user = State()
     waiting_amount = State()
+
+class BalanceRefill(StatesGroup):
+    waiting_amount = State()

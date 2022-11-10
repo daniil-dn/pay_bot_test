@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, String, Integer, func, ForeignKey, BigInteger
+from sqlalchemy import Column, DateTime, String, Integer, func, ForeignKey, BigInteger, BOOLEAN
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -24,3 +24,17 @@ class BlackList(Base):
 
     def __repr__(self):
         return 'id: {}, time: {}'.format(self.id, self.when)
+
+
+class Bill(Base):
+    __tablename__ = 'bill'
+    id = Column(BigInteger, ForeignKey('user.id'), primary_key=True)
+    billID = Column(BigInteger, index=True)
+    amount = Column(Integer, unique=False)
+    isSended = Column(BOOLEAN, unique=False, default=False)
+    when = Column(DateTime, default=func.now())
+    user = relationship(User)
+
+    def __repr__(self):
+        return 'UserID: {}, billID: {}, amount: {}, isSended: {}, time: {}'.format(self.id, self.billID, self.amount,
+                                                                                   self.isSended, self.when)

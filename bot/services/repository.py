@@ -59,3 +59,7 @@ class Repo:
         except Exception as err:
             self.logger.error(err)
             return False
+
+    async def get_user(self, userID):
+        res = await self.conn.get(User, int(userID))
+        return res
