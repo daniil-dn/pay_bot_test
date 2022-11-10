@@ -69,8 +69,9 @@ async def update_balance(cb: CallbackQuery, repo: Repo, db, logger, config, stat
     if check.status == 'PAID':
         user = await repo.get_user(cb.from_user.id)
         cur_balance = user.balance
-        new_balance = cur_balance + check.amount
-        await repo.change_balance(cb.from_user.username, new_balance)
+        new_balance = int(float(cur_balance) + float(check.amount))
+        await repo.change_balance(cb.from_user.username, int(new_balance))
+        await cb.bot.edit_message_textedit_message_reply_markup(cb.message.chat.id, cb.message.message_id, None)
         await cb.bot.send_message(cb.message.chat.id,
                                   f'👋{cb.from_user.first_name} твой баланс {new_balance}₽ 💰\n\n👇Нажмите на кнопку снизу, чтобы пополнить баланс👇',
                                   reply_markup=KeyboardManager.start_inline())
@@ -87,5 +88,5 @@ def register_user(dp: Dispatcher):
                                 role=(UserRole.USER, UserRole.ADMIN))
     dp.register_callback_query_handler(user_back, lambda c: c.data == 'user_back', state='*',
                                        role=(UserRole.USER, UserRole.ADMIN))
-    dp.register_callback_query_handler(update_balance, lambda c: c.data.find('update-balance_'), state='*',
+    dp.register_callback_query_handler(update_balance, lambda c: c.data.find('update-balance_') > -1, state='*',
                                        role=(UserRole.USER, UserRole.ADMIN))
