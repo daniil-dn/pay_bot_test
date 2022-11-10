@@ -65,8 +65,8 @@ async def on_startup(dp):
     pool_session = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
-    # p2p = QiwiP2P(auth_key=config.tg_bot.qiwi_key)
-    p2p = 2
+    p2p = QiwiP2P(auth_key=config.tg_bot.qiwi_key)
+    # p2p = 2
 
     dp.middleware.setup(DbMiddleware(pool_session, logger))
     dp.middleware.setup(EnvironmentMiddleware(config, logger, p2p))

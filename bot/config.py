@@ -17,7 +17,7 @@ class TgBot:
     token: str
     admin_ids: list
     use_redis: bool
-    qiwi_key: id
+    qiwi_key: str
 
 
 @dataclass
@@ -63,7 +63,7 @@ def load_config(path: str):
             token=tg_bot["token"],
             admin_ids=list(map(int, admins)),
             use_redis=cast_bool(tg_bot.get("use_redis")),
-            qiwi_key=int(tg_bot['qiwi_key'])
+            qiwi_key=tg_bot['qiwi_key']
         ),
         db=DbConfig(name=db['name'], user=db['user'], password=db['password'], database=db['database'],
                     host=db['host'], port=int(db['port'])),
